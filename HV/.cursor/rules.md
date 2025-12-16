@@ -136,6 +136,9 @@ MUST NOT redefine or replace these types.
 - For nullable value types, MUST prefer:
   - `if (x is not null)` instead of `if (x.HasValue)`
   - `if (x is null)` instead of `if (!x.HasValue)`
+- MUST prefer direct null-pattern checks over `{ }` property patterns for null validation:
+  - Prefer: `if (excludeId is not null)`
+  - Avoid: `if (excludeId is { } id)`
 - Access `.Value` only when the nullable was proven non-null, or use `??`/`??=`.
 
 ### Pattern matching (required when suitable)
