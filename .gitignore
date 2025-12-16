@@ -416,3 +416,9 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
