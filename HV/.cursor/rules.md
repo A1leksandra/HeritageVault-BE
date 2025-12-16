@@ -81,9 +81,20 @@ MUST NOT redefine or replace these types.
 
 ## Mapping rules
 - Mapping MUST be manual
-- Use extension methods only
-- Mapping code MUST live in BLL
 - AutoMapper or reflection-based mapping is forbidden
+- Mapping code MUST live in BLL
+
+### .NET 10 extension blocks (mandatory)
+- Use extension blocks introduced in .NET 10 for mapping extensions and collection helpers where appropriate.
+- Prefer grouping related mapping extensions into a single extension block per entity/feature.
+
+### Collection mapping (mandatory)
+- MUST NOT inline collection mapping like:
+  - `return result.Select(x => x.ToDto()).ToList();`
+- MUST create and use dedicated collection mapping extensions, e.g.:
+  - `IEnumerable<CountryListItemDto> ToListItemDtos(this IEnumerable<Country> items)`
+  - `List<CountryListItemDto> ToListItemDtoList(this IEnumerable<Country> items)`
+- Controllers and services MUST call the collection mapping extension.
 
 ---
 
@@ -110,12 +121,28 @@ MUST NOT redefine or replace these types.
 ---
 
 ## Coding style
+
+### General
 - Use primary constructors where possible
 - Use readonly fields initialized from constructor parameters
 - Always use var when type is obvious
 - Prefer LINQ where it improves clarity
+- Prefer `??` and `??=` where it improves clarity and reduces branching
 
-Formatting:
+### String comparisons (mandatory)
+- MUST NOT use `ToUpper()`, `ToLower()`, or case-conversion for comparisons.
+- MUST use `string.Equals` (or equivalent) with an explicit StringComparison:
+  - `string.Equals(a, b, StringComparison.OrdinalIgnoreCase)`
+- For searching/contains scenarios, prefer explicit comparison strategies that avoid global casing transforms.
+
+### Pattern matching (required when suitable)
+Use pattern matching to simplify logic where it improves clarity, e.g.:
+- `if (entity is null) throw ...`
+- `if (request is { TagIds.Count: > 0 }) ...`
+- `if (value is >= 1 and <= 100) ...`
+- `switch` expressions for simple mapping/translation when appropriate (do not split arms across multiple lines)
+
+### Formatting
 - if statements MUST NOT use braces
 - Controlled statement MUST be on the next line
 - Switch expressions MUST NOT split arms across lines
