@@ -129,12 +129,6 @@ MUST NOT redefine or replace these types.
 - Prefer LINQ where it improves clarity
 - Prefer `??` and `??=` where it improves clarity and reduces branching
 
-### String comparisons (mandatory)
-- MUST NOT use `ToUpper()`, `ToLower()`, or case-conversion for comparisons.
-- MUST use `string.Equals` (or equivalent) with an explicit StringComparison:
-  - `string.Equals(a, b, StringComparison.OrdinalIgnoreCase)`
-- For searching/contains scenarios, prefer explicit comparison strategies that avoid global casing transforms.
-
 ### Pattern matching (required when suitable)
 Use pattern matching to simplify logic where it improves clarity, e.g.:
 - `if (entity is null) throw ...`
