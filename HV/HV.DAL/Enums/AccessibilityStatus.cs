@@ -5,7 +5,5 @@ public enum AccessibilityStatus
     FreeAccess,
     PaidAccess,
     TemporarilyClosed,
-    RestrictedAccess,
     Inaccessible
 }
-

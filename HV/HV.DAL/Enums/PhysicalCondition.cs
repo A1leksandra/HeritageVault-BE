@@ -9,4 +9,3 @@ public enum PhysicalCondition
     SeverelyDamaged,
     Ruined
 }
-

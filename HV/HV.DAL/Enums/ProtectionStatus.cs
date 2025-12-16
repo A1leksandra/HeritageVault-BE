@@ -9,4 +9,3 @@ public enum ProtectionStatus
     UnescoCandidate,
     UnescoWorldHeritageSite
 }
-
