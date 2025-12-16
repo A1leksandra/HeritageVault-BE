@@ -129,6 +129,15 @@ MUST NOT redefine or replace these types.
 - Prefer LINQ where it improves clarity
 - Prefer `??` and `??=` where it improves clarity and reduces branching
 
+### Null checks (mandatory)
+- MUST use pattern matching null checks:
+  - Use `is null` instead of `== null`
+  - Use `is not null` instead of `!= null`
+- For nullable value types, MUST prefer:
+  - `if (x is not null)` instead of `if (x.HasValue)`
+  - `if (x is null)` instead of `if (!x.HasValue)`
+- Access `.Value` only when the nullable was proven non-null, or use `??`/`??=`.
+
 ### Pattern matching (required when suitable)
 Use pattern matching to simplify logic where it improves clarity, e.g.:
 - `if (entity is null) throw ...`
