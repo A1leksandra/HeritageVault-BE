@@ -10,9 +10,13 @@ namespace HV.BLL.Services;
 
 public sealed class CountryService(
     IRepository<Country> countryRepository,
+    IRepository<Region> regionRepository,
+    IRepository<City> cityRepository,
     IUnitOfWork unitOfWork) : ICountryService
 {
     private readonly IRepository<Country> _countryRepository = countryRepository;
+    private readonly IRepository<Region> _regionRepository = regionRepository;
+    private readonly IRepository<City> _cityRepository = cityRepository;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
     public async Task<IEnumerable<CountryListItemDto>> GetCountriesAsync(GetCountriesQuery query)
@@ -47,13 +51,7 @@ public sealed class CountryService(
         if (existingCountry is not null)
             return existingCountry.ToDetailsDto();
 
-        var country = new Country
-        {
-            Name = request.Name,
-            NormalizedName = normalizedName,
-            Code = normalizedCode,
-            IsDeleted = false
-        };
+        var country = request.ToEntity(normalizedName, normalizedCode);
 
         await _countryRepository.InsertAsync(country);
         await _unitOfWork.SaveChangesAsync();
@@ -80,9 +78,7 @@ public sealed class CountryService(
             throw new IncorrectParametersException($"Country with the same {conflictField} already exists.");
         }
 
-        country.Name = request.Name;
-        country.NormalizedName = normalizedName;
-        country.Code = normalizedCode;
+        country.UpdateFrom(request, normalizedName, normalizedCode);
 
         _countryRepository.Update(country);
         await _unitOfWork.SaveChangesAsync();
@@ -96,11 +92,19 @@ public sealed class CountryService(
             .Where(c => c.Id == id && !c.IsDeleted)
             .FirstOrDefaultAsync() ?? throw new NotFoundException($"Country with id {id} was not found.");
 
-        // TODO: Check for Regions and Cities when they are implemented
-        // If Region/City entities are not implemented yet, the delete restriction check will be added later
-        // For now, we allow deletion. When Region/City are implemented, add checks:
-        // - Cannot delete if there are any NOT-deleted Regions for this country
-        // - Cannot delete if there are any NOT-deleted Cities for this country
+        var hasActiveRegions = await _regionRepository
+            .Where(r => r.CountryId == id && !r.IsDeleted)
+            .AnyAsync();
+
+        if (hasActiveRegions)
+            throw new IncorrectParametersException("Cannot delete country because it has active regions.");
+
+        var hasActiveCities = await _cityRepository
+            .Where(c => c.CountryId == id && !c.IsDeleted)
+            .AnyAsync();
+
+        if (hasActiveCities)
+            throw new IncorrectParametersException("Cannot delete country because it has active cities.");
 
         _countryRepository.SoftDelete(country);
         await _unitOfWork.SaveChangesAsync();

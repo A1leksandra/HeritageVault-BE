@@ -22,6 +22,8 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 // Business Logic Services
 builder.Services.AddScoped<ICountryService, CountryService>();
+builder.Services.AddScoped<IRegionService, RegionService>();
+builder.Services.AddScoped<ICityService, CityService>();
 
 // FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<CreateCountryRequestValidator>();

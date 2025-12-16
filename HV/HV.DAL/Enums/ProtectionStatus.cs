@@ -7,7 +7,6 @@ public enum ProtectionStatus
     RegionalHeritageProtection,
     NationalHeritageProtection,
     UnescoCandidate,
-    UnescoWorldHeritageSite,
-    TemporarilyProtected
+    UnescoWorldHeritageSite
 }
 

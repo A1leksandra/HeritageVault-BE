@@ -7,7 +7,6 @@ public enum PhysicalCondition
     RequiresRestoration,
     PartiallyDestroyed,
     SeverelyDamaged,
-    Ruined,
-    Lost
+    Ruined
 }
 

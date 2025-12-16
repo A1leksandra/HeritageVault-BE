@@ -16,6 +16,27 @@ public static class CountryMappingExtensions
         {
             return new CountryDetailsDto(country.Id, country.Name, country.Code);
         }
+
+        public void UpdateFrom(UpdateCountryRequest request, string normalizedName, string normalizedCode)
+        {
+            country.Name = request.Name;
+            country.NormalizedName = normalizedName;
+            country.Code = normalizedCode;
+        }
+    }
+
+    extension(CreateCountryRequest request)
+    {
+        public Country ToEntity(string normalizedName, string normalizedCode)
+        {
+            return new Country
+            {
+                Name = request.Name,
+                NormalizedName = normalizedName,
+                Code = normalizedCode,
+                IsDeleted = false
+            };
+        }
     }
 
     extension(IEnumerable<Country> countries)
@@ -23,11 +44,6 @@ public static class CountryMappingExtensions
         public IEnumerable<CountryListItemDto> ToListItemDtos()
         {
             return countries.Select(c => c.ToListItemDto());
-        }
-
-        public List<CountryListItemDto> ToListItemDtoList()
-        {
-            return countries.Select(c => c.ToListItemDto()).ToList();
         }
     }
 }
