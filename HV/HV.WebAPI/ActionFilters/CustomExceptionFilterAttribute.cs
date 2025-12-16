@@ -15,6 +15,7 @@ public class CustomExceptionFilterAttribute(IWebHostEnvironment environment) : E
         var actionResult = context.Exception switch
         {
             NotFoundException ex => new NotFoundObjectResult(new ErrorResponse(ex.Message)),
+            IncorrectParametersException ex => new BadRequestObjectResult(new ErrorResponse(ex.Message)),
             CustomExceptionBase ex => new BadRequestObjectResult(new ErrorResponse(ex.Message)),
             _ => _environment.IsDevelopment()
                 ? new ObjectResult(new
