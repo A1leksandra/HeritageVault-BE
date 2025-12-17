@@ -97,10 +97,7 @@ MUST NOT redefine or replace these types.
 ### Collection mapping (mandatory)
 - MUST NOT inline collection mapping like:
   - `return result.Select(x => x.ToDto()).ToList();`
-- MUST create and use dedicated collection mapping extensions, e.g.:
-  - `IEnumerable<CountryListItemDto> ToListItemDtos(this IEnumerable<Country> items)`
-  - `List<CountryListItemDto> ToListItemDtoList(this IEnumerable<Country> items)`
-- Controllers and services MUST call the collection mapping extension.
+- MUST create and use dedicated collection mapping extensions.
 
 ---
 
@@ -112,9 +109,9 @@ MUST NOT redefine or replace these types.
 ### File upload validation
 - File type validation MUST be enforced (in service and/or controller):
   - Accept common image formats only (PNG, JPEG, etc.).
-  - Validate by content type and/or extension (prefer content type + extension together).
+  - Validate by content type and/or extension.
 - Invalid image upload MUST throw CustomExceptionBase (HTTP 400).
-- If the uploaded image is missing/empty, return 400.
+- If the uploaded image is missing or empty, return 400.
 
 ---
 
@@ -140,26 +137,15 @@ MUST NOT redefine or replace these types.
 - Use readonly fields initialized from constructor parameters
 - Always use var when type is obvious
 - Prefer LINQ where it improves clarity
-- Prefer `??` and `??=` where it improves clarity and reduces branching
+- Prefer `??` and `??=` where it improves clarity
 
 ### Null checks (mandatory)
-- MUST use pattern matching null checks:
-  - Use `is null` instead of `== null`
-  - Use `is not null` instead of `!= null`
-- For nullable value types, MUST prefer:
-  - `if (x is not null)` instead of `if (x.HasValue)`
-  - `if (x is null)` instead of `if (!x.HasValue)`
-- MUST prefer direct null-pattern checks over `{ }` property patterns for null validation:
-  - Prefer: `if (excludeId is not null)`
-  - Avoid: `if (excludeId is { } id)`
-- Access `.Value` only when the nullable was proven non-null, or use `??`/`??=`.
+- MUST use pattern matching null checks (`is null`, `is not null`)
+- Prefer direct null checks over nullable property patterns
+- Access nullable `.Value` only when proven non-null
 
-### Pattern matching (required when suitable)
-Use pattern matching to simplify logic where it improves clarity, e.g.:
-- `if (entity is null) throw ...`
-- `if (request is { TagIds.Count: > 0 }) ...`
-- `if (value is >= 1 and <= 100) ...`
-- `switch` expressions for simple mapping/translation when appropriate (do not split arms across multiple lines)
+### Pattern matching
+Use pattern matching where it improves clarity.
 
 ### Formatting
 - if statements MUST NOT use braces
@@ -169,20 +155,14 @@ Use pattern matching to simplify logic where it improves clarity, e.g.:
 ---
 
 ## Landmark image storage rules
-- Uploaded images MUST be stored under the application `wwwroot` (web root).
-- The database MUST store:
-  - Uploaded image path (relative path within wwwroot, suitable for building a public URL)
-  - An image link URL suitable for frontend display
-  - Optional external image link URL if introduced by scope (docs/scope.md)
-- Upload behavior MUST replace the existing uploaded image:
-  - Old file MUST be deleted from disk when replaced.
-  - DB fields MUST be updated accordingly.
-- Delete-image endpoint MUST:
-  - delete the file from disk (if present)
-  - clear the uploaded-image fields in DB
-- File system operations MUST be implemented via an abstraction in BLL (e.g., IFileStorageService) and used by LandmarkService.
-  - WebAPI provides environment details (like web root path) through DI.
-  - Do not implement file IO directly in controllers.
+- Uploaded images MUST be stored under application `wwwroot`.
+- Database MUST store:
+  - uploaded image path (relative to wwwroot)
+  - image link URL suitable for frontend display
+- Upload replaces existing image and deletes old file.
+- Delete-image endpoint deletes file and clears image fields.
+- File system operations MUST be abstracted in BLL (e.g., IFileStorageService).
+- Controllers MUST NOT perform file I/O.
 
 ---
 

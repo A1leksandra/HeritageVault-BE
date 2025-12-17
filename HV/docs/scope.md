@@ -2,7 +2,7 @@
 
 ## Domain summary
 HeritageVault is a public registry system for historical landmarks.  
-The system stores and exposes information about landmarks, their locations, their historical condition, legal protection, accessibility, and cultural classifications.
+The system stores and exposes information about landmarks, their locations, their historical condition, legal protection, and accessibility.
 
 The platform is designed as an open, read-only friendly registry:
 - no authentication
@@ -11,8 +11,7 @@ The platform is designed as an open, read-only friendly registry:
 
 Primary use cases:
 - maintain a clean, structured registry of countries, regions, cities, and landmarks
-- classify landmarks using reusable tags
-- browse and filter landmarks by location, condition, protection, accessibility, and tags
+- browse and filter landmarks by location, condition, protection, and accessibility
 - safely retire (soft-delete) obsolete reference data without losing historical context
 - optionally attach a representative image to a landmark for presentation purposes
 
@@ -32,7 +31,6 @@ Each landmark has:
 - exactly one **Protection Status** (legal)
 - exactly one **Physical Condition** (state)
 - exactly one **Accessibility Status** (public access)
-- zero or more **Landmark Tags** (descriptive labels)
 
 ### Landmark image
 A landmark may optionally have an image used for visual presentation in the frontend.
@@ -111,23 +109,6 @@ Cities must be unique within a country + region context by name.
 
 ---
 
-### LandmarkTag
-Represents a reusable descriptive label.
-
-Examples:
-- Castle
-- Historical Site
-- Fortress
-- Cultural Heritage
-
-Tags:
-- are global
-- are reusable
-- are hard-deleted
-- must have unique names
-
----
-
 ### Landmark
 Represents a historical landmark.
 
@@ -136,7 +117,6 @@ A landmark:
 - has one protection status
 - has one physical condition
 - has one accessibility status
-- may have multiple tags
 - may optionally have an associated image
 
 Landmarks are hard-deleted.
@@ -174,10 +154,9 @@ Soft-deleted items:
 ### Hard delete rules
 Hard delete applies to:
 - Landmark
-- LandmarkTag
 
 ### Duplicate handling (idempotency)
-- Creating a Country, Region, City, or LandmarkTag with the same identity does not fail
+- Creating a Country, Region, or City with the same identity does not fail
 - The existing entity is returned instead
 - Identity is defined by business uniqueness (normalized name + context)
 
