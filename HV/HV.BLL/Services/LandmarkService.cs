@@ -6,6 +6,7 @@ using HV.BLL.Mapping;
 using HV.BLL.Services.Abstractions;
 using HV.DAL.Abstractions;
 using HV.DAL.Entities;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace HV.BLL.Services;
@@ -14,11 +15,13 @@ public sealed class LandmarkService(
     IRepository<Landmark> landmarkRepository,
     IRepository<LandmarkTag> tagRepository,
     IRepository<City> cityRepository,
+    IFileStorageService fileStorageService,
     IUnitOfWork unitOfWork) : ILandmarkService
 {
     private readonly IRepository<Landmark> _landmarkRepository = landmarkRepository;
     private readonly IRepository<LandmarkTag> _tagRepository = tagRepository;
     private readonly IRepository<City> _cityRepository = cityRepository;
+    private readonly IFileStorageService _fileStorageService = fileStorageService;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
     public async Task<IEnumerable<LandmarkListItemDto>> GetListAsync(GetLandmarksQuery query)
@@ -191,6 +194,42 @@ public sealed class LandmarkService(
             .FirstOrDefaultAsync() ?? throw new NotFoundException($"Landmark with id {id} was not found.");
 
         _landmarkRepository.Delete(landmark);
+        await _unitOfWork.SaveChangesAsync();
+    }
+
+    public async Task UploadImageAsync(int id, IFormFile file)
+    {
+        var landmark = await _landmarkRepository
+            .FirstOrDefaultAsync(l => l.Id == id) ?? throw new NotFoundException($"Landmark with id {id} was not found.");
+
+        if (!string.IsNullOrEmpty(landmark.UploadedImagePath))
+        {
+            await _fileStorageService.DeleteFileIfExistsAsync(landmark.UploadedImagePath);
+        }
+
+        var (relativePath, publicUrl) = await _fileStorageService.SaveLandmarkImageAsync(file);
+
+        landmark.UploadedImagePath = relativePath;
+        landmark.ImageUrl = publicUrl;
+
+        _landmarkRepository.Update(landmark);
+        await _unitOfWork.SaveChangesAsync();
+    }
+
+    public async Task DeleteImageAsync(int id)
+    {
+        var landmark = await _landmarkRepository
+            .FirstOrDefaultAsync(l => l.Id == id) ?? throw new NotFoundException($"Landmark with id {id} was not found.");
+
+        if (!string.IsNullOrEmpty(landmark.UploadedImagePath))
+        {
+            await _fileStorageService.DeleteFileIfExistsAsync(landmark.UploadedImagePath);
+        }
+
+        landmark.UploadedImagePath = null;
+        landmark.ImageUrl = null;
+
+        _landmarkRepository.Update(landmark);
         await _unitOfWork.SaveChangesAsync();
     }
 }

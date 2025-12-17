@@ -20,5 +20,7 @@ public record LandmarkDetailsDto(
     PhysicalCondition PhysicalCondition,
     AccessibilityStatus AccessibilityStatus,
     string? ExternalRegistryUrl,
+    string? UploadedImagePath,
+    string? ImageUrl,
     IReadOnlyList<TagDto> Tags);
 

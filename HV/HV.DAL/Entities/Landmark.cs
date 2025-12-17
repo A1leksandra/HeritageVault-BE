@@ -17,6 +17,8 @@ public class Landmark : BaseEntity
     public required PhysicalCondition PhysicalCondition { get; set; }
     public required AccessibilityStatus AccessibilityStatus { get; set; }
     public string? ExternalRegistryUrl { get; set; }
+    public string? UploadedImagePath { get; set; }
+    public string? ImageUrl { get; set; }
 
     public City City { get; set; } = null!;
     public ICollection<LandmarkTag> Tags { get; set; } = new List<LandmarkTag>();

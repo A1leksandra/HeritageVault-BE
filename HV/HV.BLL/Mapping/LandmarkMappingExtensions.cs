@@ -18,6 +18,7 @@ public static class LandmarkMappingExtensions
                 landmark.ProtectionStatus,
                 landmark.PhysicalCondition,
                 landmark.AccessibilityStatus,
+                landmark.ImageUrl,
                 tags);
         }
 
@@ -42,6 +43,8 @@ public static class LandmarkMappingExtensions
                 landmark.PhysicalCondition,
                 landmark.AccessibilityStatus,
                 landmark.ExternalRegistryUrl,
+                landmark.UploadedImagePath,
+                landmark.ImageUrl,
                 tags);
         }
 

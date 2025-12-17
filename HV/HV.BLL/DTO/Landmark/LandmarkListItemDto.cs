@@ -10,5 +10,6 @@ public record LandmarkListItemDto(
     ProtectionStatus ProtectionStatus,
     PhysicalCondition PhysicalCondition,
     AccessibilityStatus AccessibilityStatus,
+    string? ImageUrl,
     IReadOnlyList<TagDto> Tags);
 

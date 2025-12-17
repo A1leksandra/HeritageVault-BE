@@ -156,6 +156,12 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             entity.Property(e => e.ExternalRegistryUrl)
                 .HasMaxLength(500);
 
+            entity.Property(e => e.UploadedImagePath)
+                .HasMaxLength(500);
+
+            entity.Property(e => e.ImageUrl)
+                .HasMaxLength(500);
+
             entity.Property(e => e.ProtectionStatus)
                 .IsRequired();
 

@@ -10,6 +10,11 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Ensure wwwroot directory exists
+var wwwrootPath = Path.Combine(builder.Environment.ContentRootPath, "wwwroot");
+if (!Directory.Exists(wwwrootPath))
+    Directory.CreateDirectory(wwwrootPath);
+
 builder.Services.AddControllers(options => { options.Filters.Add<CustomExceptionFilterAttribute>(); });
 
 builder.Services.AddOpenApi();
@@ -27,6 +32,9 @@ builder.Services.AddScoped<IRegionService, RegionService>();
 builder.Services.AddScoped<ICityService, CityService>();
 builder.Services.AddScoped<ILandmarkTagService, LandmarkTagService>();
 builder.Services.AddScoped<ILandmarkService, LandmarkService>();
+
+// Infrastructure Services
+builder.Services.AddScoped<HV.BLL.Services.Abstractions.IFileStorageService, HV.WebAPI.Services.FileStorageService>();
 
 // FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<CreateCountryRequestValidator>();
@@ -46,6 +54,14 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        ctx.Context.Response.Headers.Append("Cache-Control", "public,max-age=31536000");
+    }
+});
 
 app.MapControllers();
 

@@ -44,5 +44,20 @@ public sealed class LandmarksController(ILandmarkService landmarkService) : Cont
         await _landmarkService.DeleteAsync(id);
         return NoContent();
     }
+
+    [HttpPost("{id:int}/image")]
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> UploadImage(int id, IFormFile file)
+    {
+        await _landmarkService.UploadImageAsync(id, file);
+        return NoContent();
+    }
+
+    [HttpDelete("{id:int}/image")]
+    public async Task<IActionResult> DeleteImage(int id)
+    {
+        await _landmarkService.DeleteImageAsync(id);
+        return NoContent();
+    }
 }
 
