@@ -3,6 +3,7 @@ using HV.DAL;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HV.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251217005511_AddLandmarks")]
+    partial class AddLandmarks
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -57,8 +60,6 @@ namespace HV.DAL.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("RegionId");
 
                     b.HasIndex("CountryId", "RegionId", "NormalizedName");
 
@@ -156,8 +157,6 @@ namespace HV.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CityId");
-
                     b.ToTable("Landmarks");
                 });
 
@@ -242,46 +241,6 @@ namespace HV.DAL.Migrations
                     b.ToTable("LandmarkLandmarkTag", (string)null);
                 });
 
-            modelBuilder.Entity("HV.DAL.Entities.City", b =>
-                {
-                    b.HasOne("HV.DAL.Entities.Country", "Country")
-                        .WithMany("Cities")
-                        .HasForeignKey("CountryId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("HV.DAL.Entities.Region", "Region")
-                        .WithMany("Cities")
-                        .HasForeignKey("RegionId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("Country");
-
-                    b.Navigation("Region");
-                });
-
-            modelBuilder.Entity("HV.DAL.Entities.Landmark", b =>
-                {
-                    b.HasOne("HV.DAL.Entities.City", "City")
-                        .WithMany("Landmarks")
-                        .HasForeignKey("CityId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("City");
-                });
-
-            modelBuilder.Entity("HV.DAL.Entities.Region", b =>
-                {
-                    b.HasOne("HV.DAL.Entities.Country", "Country")
-                        .WithMany("Regions")
-                        .HasForeignKey("CountryId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Country");
-                });
-
             modelBuilder.Entity("LandmarkLandmarkTag", b =>
                 {
                     b.HasOne("HV.DAL.Entities.Landmark", null)
@@ -295,23 +254,6 @@ namespace HV.DAL.Migrations
                         .HasForeignKey("LandmarkTagId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("HV.DAL.Entities.City", b =>
-                {
-                    b.Navigation("Landmarks");
-                });
-
-            modelBuilder.Entity("HV.DAL.Entities.Country", b =>
-                {
-                    b.Navigation("Cities");
-
-                    b.Navigation("Regions");
-                });
-
-            modelBuilder.Entity("HV.DAL.Entities.Region", b =>
-                {
-                    b.Navigation("Cities");
                 });
 #pragma warning restore 612, 618
         }

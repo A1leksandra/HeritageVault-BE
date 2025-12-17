@@ -2,6 +2,7 @@ using HV.BLL.DTO.Region;
 using HV.BLL.Exceptions;
 using HV.BLL.Exceptions.Abstractions;
 using HV.BLL.Mapping;
+using HV.BLL.Services.Abstractions;
 using HV.DAL.Abstractions;
 using HV.DAL.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +20,7 @@ public sealed class RegionService(
     private readonly IRepository<City> _cityRepository = cityRepository;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-    public async Task<IEnumerable<RegionListItemDto>> GetRegionsAsync(GetRegionsQuery query)
+    public async Task<IEnumerable<RegionListItemDto>> GetListAsync(GetRegionsQuery query)
     {
         var regions = _regionRepository.AsQueryable();
 
@@ -33,16 +34,17 @@ public sealed class RegionService(
         return result.ToListItemDtos();
     }
 
-    public async Task<RegionDetailsDto> GetRegionByIdAsync(int id)
+    public async Task<RegionDetailsDto> GetByIdAsync(int id)
     {
         var region = await _regionRepository
+            .Include(r => r.Country)
             .Where(r => r.Id == id && !r.IsDeleted)
             .FirstOrDefaultAsync() ?? throw new NotFoundException($"Region with id {id} was not found.");
 
         return region.ToDetailsDto();
     }
 
-    public async Task<RegionDetailsDto> CreateRegionAsync(CreateRegionRequest request)
+    public async Task<RegionDetailsDto> CreateAsync(CreateRegionRequest request)
     {
         var countryExists = await _countryRepository
             .Where(c => c.Id == request.CountryId && !c.IsDeleted)
@@ -54,6 +56,7 @@ public sealed class RegionService(
         var normalizedName = NormalizeName(request.Name);
 
         var existingRegion = await _regionRepository
+            .Include(r => r.Country)
             .Where(r => r.CountryId == request.CountryId && r.NormalizedName == normalizedName)
             .FirstOrDefaultAsync();
 
@@ -65,10 +68,15 @@ public sealed class RegionService(
         await _regionRepository.InsertAsync(region);
         await _unitOfWork.SaveChangesAsync();
 
-        return region.ToDetailsDto();
+        var createdRegion = await _regionRepository
+            .Include(r => r.Country)
+            .Where(r => r.Id == region.Id)
+            .FirstOrDefaultAsync() ?? throw new NotFoundException($"Region with id {region.Id} was not found.");
+
+        return createdRegion.ToDetailsDto();
     }
 
-    public async Task<RegionDetailsDto> UpdateRegionAsync(int id, UpdateRegionRequest request)
+    public async Task<RegionDetailsDto> UpdateAsync(int id, UpdateRegionRequest request)
     {
         var region = await _regionRepository
             .Where(r => r.Id == id && !r.IsDeleted)
@@ -95,10 +103,15 @@ public sealed class RegionService(
         _regionRepository.Update(region);
         await _unitOfWork.SaveChangesAsync();
 
-        return region.ToDetailsDto();
+        var updatedRegion = await _regionRepository
+            .Include(r => r.Country)
+            .Where(r => r.Id == id)
+            .FirstOrDefaultAsync() ?? throw new NotFoundException($"Region with id {id} was not found.");
+
+        return updatedRegion.ToDetailsDto();
     }
 
-    public async Task DeleteRegionAsync(int id)
+    public async Task DeleteAsync(int id)
     {
         var region = await _regionRepository
             .Where(r => r.Id == id && !r.IsDeleted)

@@ -2,6 +2,7 @@ using HV.BLL.DTO.City;
 using HV.BLL.Exceptions;
 using HV.BLL.Exceptions.Abstractions;
 using HV.BLL.Mapping;
+using HV.BLL.Services.Abstractions;
 using HV.DAL.Abstractions;
 using HV.DAL.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -12,14 +13,16 @@ public sealed class CityService(
     IRepository<City> cityRepository,
     IRepository<Country> countryRepository,
     IRepository<Region> regionRepository,
+    IRepository<Landmark> landmarkRepository,
     IUnitOfWork unitOfWork) : ICityService
 {
     private readonly IRepository<City> _cityRepository = cityRepository;
     private readonly IRepository<Country> _countryRepository = countryRepository;
     private readonly IRepository<Region> _regionRepository = regionRepository;
+    private readonly IRepository<Landmark> _landmarkRepository = landmarkRepository;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-    public async Task<IEnumerable<CityListItemDto>> GetCitiesAsync(GetCitiesQuery query)
+    public async Task<IEnumerable<CityListItemDto>> GetListAsync(GetCitiesQuery query)
     {
         var cities = _cityRepository.AsQueryable();
 
@@ -42,16 +45,18 @@ public sealed class CityService(
         return result.ToListItemDtos();
     }
 
-    public async Task<CityDetailsDto> GetCityByIdAsync(int id)
+    public async Task<CityDetailsDto> GetByIdAsync(int id)
     {
         var city = await _cityRepository
+            .Include(c => c.Country)
+            .Include(c => c.Region)
             .Where(c => c.Id == id && !c.IsDeleted)
             .FirstOrDefaultAsync() ?? throw new NotFoundException($"City with id {id} was not found.");
 
         return city.ToDetailsDto();
     }
 
-    public async Task<CityDetailsDto> CreateCityAsync(CreateCityRequest request)
+    public async Task<CityDetailsDto> CreateAsync(CreateCityRequest request)
     {
         var countryExists = await _countryRepository
             .Where(c => c.Id == request.CountryId && !c.IsDeleted)
@@ -89,10 +94,16 @@ public sealed class CityService(
         await _cityRepository.InsertAsync(city);
         await _unitOfWork.SaveChangesAsync();
 
-        return city.ToDetailsDto();
+        var createdCity = await _cityRepository
+            .Include(c => c.Country)
+            .Include(c => c.Region)
+            .Where(c => c.Id == city.Id)
+            .FirstOrDefaultAsync() ?? throw new NotFoundException($"City with id {city.Id} was not found.");
+
+        return createdCity.ToDetailsDto();
     }
 
-    public async Task<CityDetailsDto> UpdateCityAsync(int id, UpdateCityRequest request)
+    public async Task<CityDetailsDto> UpdateAsync(int id, UpdateCityRequest request)
     {
         var city = await _cityRepository
             .Where(c => c.Id == id && !c.IsDeleted)
@@ -134,19 +145,27 @@ public sealed class CityService(
         _cityRepository.Update(city);
         await _unitOfWork.SaveChangesAsync();
 
-        return city.ToDetailsDto();
+        var updatedCity = await _cityRepository
+            .Include(c => c.Country)
+            .Include(c => c.Region)
+            .Where(c => c.Id == id)
+            .FirstOrDefaultAsync() ?? throw new NotFoundException($"City with id {id} was not found.");
+
+        return updatedCity.ToDetailsDto();
     }
 
-    public async Task DeleteCityAsync(int id)
+    public async Task DeleteAsync(int id)
     {
         var city = await _cityRepository
             .Where(c => c.Id == id && !c.IsDeleted)
             .FirstOrDefaultAsync() ?? throw new NotFoundException($"City with id {id} was not found.");
 
-        // TODO: Check for Landmarks when they are implemented
-        // If Landmark entity is not implemented yet, throw exception
-        // When Landmark is implemented, check for NOT-deleted Landmarks and throw if any exist
-        throw new IncorrectParametersException("Cannot delete city while Landmarks are not implemented.");
+        var hasLandmarks = await _landmarkRepository
+            .Where(l => l.CityId == id)
+            .AnyAsync();
+
+        if (hasLandmarks)
+            throw new IncorrectParametersException("Cannot delete city because it has landmarks.");
 
         _cityRepository.SoftDelete(city);
         await _unitOfWork.SaveChangesAsync();
@@ -155,6 +174,8 @@ public sealed class CityService(
     private async Task<City?> FindExistingCityAsync(int countryId, int? regionId, string normalizedName, int? excludeId = null)
     {
         var query = _cityRepository
+            .Include(c => c.Country)
+            .Include(c => c.Region)
             .Where(c => c.CountryId == countryId && c.NormalizedName == normalizedName);
 
         if (excludeId is not null)
@@ -162,6 +183,8 @@ public sealed class CityService(
 
         if (regionId is not null)
             query = query.Where(c => c.RegionId == regionId.Value);
+        else
+            query = query.Where(c => c.RegionId == null);
 
         return await query.FirstOrDefaultAsync();
     }

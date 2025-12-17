@@ -10,5 +10,9 @@ public class City : SoftDeletableEntity
     public required string NormalizedName { get; set; }
     public decimal? Latitude { get; set; }
     public decimal? Longitude { get; set; }
+
+    public Country Country { get; set; } = null!;
+    public Region? Region { get; set; }
+    public ICollection<Landmark> Landmarks { get; set; } = new List<Landmark>();
 }
 

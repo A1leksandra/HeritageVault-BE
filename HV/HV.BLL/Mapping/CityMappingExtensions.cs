@@ -14,7 +14,15 @@ public static class CityMappingExtensions
 
         public CityDetailsDto ToDetailsDto()
         {
-            return new CityDetailsDto(city.Id, city.CountryId, city.RegionId, city.Name, city.Latitude, city.Longitude);
+            return new CityDetailsDto(
+                city.Id,
+                city.CountryId,
+                city.Country.Name,
+                city.RegionId,
+                city.Region?.Name,
+                city.Name,
+                city.Latitude,
+                city.Longitude);
         }
 
         public void UpdateFrom(UpdateCityRequest request, string normalizedName)

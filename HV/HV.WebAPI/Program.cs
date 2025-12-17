@@ -1,5 +1,6 @@
 using FluentValidation;
 using HV.BLL.Services;
+using HV.BLL.Services.Abstractions;
 using HV.BLL.Validators;
 using HV.DAL;
 using HV.DAL.Abstractions;
@@ -24,6 +25,8 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ICountryService, CountryService>();
 builder.Services.AddScoped<IRegionService, RegionService>();
 builder.Services.AddScoped<ICityService, CityService>();
+builder.Services.AddScoped<ILandmarkTagService, LandmarkTagService>();
+builder.Services.AddScoped<ILandmarkService, LandmarkService>();
 
 // FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<CreateCountryRequestValidator>();

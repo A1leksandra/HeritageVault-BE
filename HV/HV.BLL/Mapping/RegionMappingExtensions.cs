@@ -14,7 +14,7 @@ public static class RegionMappingExtensions
 
         public RegionDetailsDto ToDetailsDto()
         {
-            return new RegionDetailsDto(region.Id, region.CountryId, region.Name, region.Type);
+            return new RegionDetailsDto(region.Id, region.CountryId, region.Country.Name, region.Name, region.Type);
         }
 
         public void UpdateFrom(UpdateRegionRequest request, string normalizedName)

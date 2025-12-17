@@ -2,6 +2,7 @@ using HV.BLL.DTO.Country;
 using HV.BLL.Exceptions;
 using HV.BLL.Exceptions.Abstractions;
 using HV.BLL.Mapping;
+using HV.BLL.Services.Abstractions;
 using HV.DAL.Abstractions;
 using HV.DAL.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -19,7 +20,7 @@ public sealed class CountryService(
     private readonly IRepository<City> _cityRepository = cityRepository;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-    public async Task<IEnumerable<CountryListItemDto>> GetCountriesAsync(GetCountriesQuery query)
+    public async Task<IEnumerable<CountryListItemDto>> GetListAsync(GetCountriesQuery query)
     {
         var countries = _countryRepository.AsQueryable();
 
@@ -30,7 +31,7 @@ public sealed class CountryService(
         return result.ToListItemDtos();
     }
 
-    public async Task<CountryDetailsDto> GetCountryByIdAsync(int id)
+    public async Task<CountryDetailsDto> GetByIdAsync(int id)
     {
         var country = await _countryRepository
             .Where(c => c.Id == id && !c.IsDeleted)
@@ -39,7 +40,7 @@ public sealed class CountryService(
         return country.ToDetailsDto();
     }
 
-    public async Task<CountryDetailsDto> CreateCountryAsync(CreateCountryRequest request)
+    public async Task<CountryDetailsDto> CreateAsync(CreateCountryRequest request)
     {
         var normalizedName = NormalizeName(request.Name);
         var normalizedCode = NormalizeCode(request.Code);
@@ -59,7 +60,7 @@ public sealed class CountryService(
         return country.ToDetailsDto();
     }
 
-    public async Task<CountryDetailsDto> UpdateCountryAsync(int id, UpdateCountryRequest request)
+    public async Task<CountryDetailsDto> UpdateAsync(int id, UpdateCountryRequest request)
     {
         var country = await _countryRepository
             .Where(c => c.Id == id && !c.IsDeleted)
@@ -86,7 +87,7 @@ public sealed class CountryService(
         return country.ToDetailsDto();
     }
 
-    public async Task DeleteCountryAsync(int id)
+    public async Task DeleteAsync(int id)
     {
         var country = await _countryRepository
             .Where(c => c.Id == id && !c.IsDeleted)

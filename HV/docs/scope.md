@@ -182,7 +182,6 @@ Hard delete applies to:
 - A Country cannot be deleted while it has active Regions or Cities
 - A Region cannot be deleted while it has active Cities
 - A City cannot be deleted while it has Landmarks
-- A LandmarkTag cannot be deleted if it is assigned to any Landmark
 
 ### Visibility rules
 - Landmarks belonging to deleted cities are not visible
