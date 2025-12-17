@@ -13,6 +13,5 @@ public record UpdateLandmarkRequest(
     ProtectionStatus ProtectionStatus,
     PhysicalCondition PhysicalCondition,
     AccessibilityStatus AccessibilityStatus,
-    string? ExternalRegistryUrl,
-    int[]? TagIds);
+    string? ExternalRegistryUrl);
 

@@ -9,6 +9,5 @@ public record GetLandmarksQuery(
     ProtectionStatus? ProtectionStatus = null,
     PhysicalCondition? PhysicalCondition = null,
     AccessibilityStatus? AccessibilityStatus = null,
-    int[]? TagIds = null,
     string? NameContains = null);
 

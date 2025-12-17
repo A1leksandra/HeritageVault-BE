@@ -49,13 +49,6 @@ public sealed class CreateLandmarkRequestValidator : AbstractValidator<CreateLan
             .MaximumLength(500)
             .WithMessage("ExternalRegistryUrl must not exceed 500 characters.")
             .When(x => x.ExternalRegistryUrl is not null);
-
-        RuleFor(x => x.TagIds)
-            .Must(tagIds => tagIds is null || tagIds.Length <= 50)
-            .WithMessage("TagIds must not exceed 50 items.")
-            .Must(tagIds => tagIds is null || tagIds.Distinct().Count() == tagIds.Length)
-            .WithMessage("TagIds must contain unique values.")
-            .When(x => x.TagIds is not null);
     }
 }
 

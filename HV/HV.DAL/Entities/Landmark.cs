@@ -21,6 +21,5 @@ public class Landmark : BaseEntity
     public string? ImageUrl { get; set; }
 
     public City City { get; set; } = null!;
-    public ICollection<LandmarkTag> Tags { get; set; } = new List<LandmarkTag>();
 }
 

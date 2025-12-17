@@ -13,13 +13,11 @@ namespace HV.BLL.Services;
 
 public sealed class LandmarkService(
     IRepository<Landmark> landmarkRepository,
-    IRepository<LandmarkTag> tagRepository,
     IRepository<City> cityRepository,
     IFileStorageService fileStorageService,
     IUnitOfWork unitOfWork) : ILandmarkService
 {
     private readonly IRepository<Landmark> _landmarkRepository = landmarkRepository;
-    private readonly IRepository<LandmarkTag> _tagRepository = tagRepository;
     private readonly IRepository<City> _cityRepository = cityRepository;
     private readonly IFileStorageService _fileStorageService = fileStorageService;
     private readonly IUnitOfWork _unitOfWork = unitOfWork;
@@ -47,12 +45,6 @@ public sealed class LandmarkService(
         if (query.AccessibilityStatus is not null)
             landmarks = landmarks.Where(l => l.AccessibilityStatus == query.AccessibilityStatus.Value);
 
-        if (query.TagIds?.Length > 0)
-        {
-            var tagIds = query.TagIds.Distinct().ToArray();
-            landmarks = landmarks.Where(l => l.Tags.Any(t => tagIds.Contains(t.Id)));
-        }
-
         if (query.NameContains is not null)
         {
             var normalizedSearch = NameNormalizer.Normalize(query.NameContains);
@@ -60,7 +52,6 @@ public sealed class LandmarkService(
         }
 
         var result = await landmarks
-            .Include(l => l.Tags)
             .Include(l => l.City)
                 .ThenInclude(c => c.Country)
             .Include(l => l.City)
@@ -73,7 +64,6 @@ public sealed class LandmarkService(
     public async Task<LandmarkDetailsDto> GetByIdAsync(int id)
     {
         var landmark = await _landmarkRepository
-            .Include(l => l.Tags)
             .Include(l => l.City)
                 .ThenInclude(c => c.Country)
             .Include(l => l.City)
@@ -96,7 +86,6 @@ public sealed class LandmarkService(
         var normalizedName = NameNormalizer.Normalize(request.Name);
 
         var existingLandmark = await _landmarkRepository
-            .Include(l => l.Tags)
             .Include(l => l.City)
                 .ThenInclude(c => c.Country)
             .Include(l => l.City)
@@ -107,28 +96,12 @@ public sealed class LandmarkService(
         if (existingLandmark is not null)
             return existingLandmark.ToDetailsDto();
 
-        ICollection<LandmarkTag> tags = new List<LandmarkTag>();
-
-        if (request.TagIds is not null && request.TagIds.Length > 0)
-        {
-            var tagIds = request.TagIds.Distinct().ToArray();
-            var foundTags = await _tagRepository
-                .Where(t => tagIds.Contains(t.Id))
-                .ToListAsync();
-
-            if (foundTags.Count != tagIds.Length)
-                throw new IncorrectParametersException("One or more tag IDs do not exist.");
-
-            tags = foundTags;
-        }
-
-        var landmark = request.ToEntity(normalizedName, tags);
+        var landmark = request.ToEntity(normalizedName);
 
         await _landmarkRepository.InsertAsync(landmark);
         await _unitOfWork.SaveChangesAsync();
 
         var createdLandmark = await _landmarkRepository
-            .Include(l => l.Tags)
             .Include(l => l.City)
                 .ThenInclude(c => c.Country)
             .Include(l => l.City)
@@ -142,7 +115,6 @@ public sealed class LandmarkService(
     public async Task<LandmarkDetailsDto> UpdateAsync(int id, UpdateLandmarkRequest request)
     {
         var landmark = await _landmarkRepository
-            .Include(l => l.Tags)
             .Where(l => l.Id == id)
             .FirstOrDefaultAsync() ?? throw new NotFoundException($"Landmark with id {id} was not found.");
 
@@ -153,30 +125,14 @@ public sealed class LandmarkService(
         if (!cityExists)
             throw new NotFoundException($"City with id {request.CityId} was not found.");
 
-        ICollection<LandmarkTag> tags = new List<LandmarkTag>();
-
-        if (request.TagIds is not null && request.TagIds.Length > 0)
-        {
-            var tagIds = request.TagIds.Distinct().ToArray();
-            var foundTags = await _tagRepository
-                .Where(t => tagIds.Contains(t.Id))
-                .ToListAsync();
-
-            if (foundTags.Count != tagIds.Length)
-                throw new IncorrectParametersException("One or more tag IDs do not exist.");
-
-            tags = foundTags;
-        }
-
         var normalizedName = NameNormalizer.Normalize(request.Name);
 
-        landmark.UpdateFrom(request, normalizedName, tags);
+        landmark.UpdateFrom(request, normalizedName);
 
         _landmarkRepository.Update(landmark);
         await _unitOfWork.SaveChangesAsync();
 
         var updatedLandmark = await _landmarkRepository
-            .Include(l => l.Tags)
             .Include(l => l.City)
                 .ThenInclude(c => c.Country)
             .Include(l => l.City)

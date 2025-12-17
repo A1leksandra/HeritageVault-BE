@@ -13,6 +13,5 @@ public record CreateLandmarkRequest(
     ProtectionStatus ProtectionStatus,
     PhysicalCondition PhysicalCondition,
     AccessibilityStatus AccessibilityStatus,
-    string? ExternalRegistryUrl,
-    int[]? TagIds);
+    string? ExternalRegistryUrl);
 

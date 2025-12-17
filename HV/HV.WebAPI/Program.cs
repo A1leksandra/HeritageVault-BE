@@ -30,7 +30,6 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<ICountryService, CountryService>();
 builder.Services.AddScoped<IRegionService, RegionService>();
 builder.Services.AddScoped<ICityService, CityService>();
-builder.Services.AddScoped<ILandmarkTagService, LandmarkTagService>();
 builder.Services.AddScoped<ILandmarkService, LandmarkService>();
 
 // Infrastructure Services

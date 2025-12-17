@@ -9,7 +9,6 @@ public static class LandmarkMappingExtensions
     {
         public LandmarkListItemDto ToListItemDto()
         {
-            var tags = landmark.Tags.Select(t => new TagDto(t.Id, t.Name)).ToList();
             return new LandmarkListItemDto(
                 landmark.Id,
                 landmark.CityId,
@@ -18,13 +17,11 @@ public static class LandmarkMappingExtensions
                 landmark.ProtectionStatus,
                 landmark.PhysicalCondition,
                 landmark.AccessibilityStatus,
-                landmark.ImageUrl,
-                tags);
+                landmark.ImageUrl);
         }
 
         public LandmarkDetailsDto ToDetailsDto()
         {
-            var tags = landmark.Tags.Select(t => new TagDto(t.Id, t.Name)).ToList();
             return new LandmarkDetailsDto(
                 landmark.Id,
                 landmark.CityId,
@@ -44,11 +41,10 @@ public static class LandmarkMappingExtensions
                 landmark.AccessibilityStatus,
                 landmark.ExternalRegistryUrl,
                 landmark.UploadedImagePath,
-                landmark.ImageUrl,
-                tags);
+                landmark.ImageUrl);
         }
 
-        public void UpdateFrom(UpdateLandmarkRequest request, string? normalizedName, ICollection<LandmarkTag> tags)
+        public void UpdateFrom(UpdateLandmarkRequest request, string? normalizedName)
         {
             landmark.CityId = request.CityId;
             landmark.Name = request.Name;
@@ -62,13 +58,12 @@ public static class LandmarkMappingExtensions
             landmark.PhysicalCondition = request.PhysicalCondition;
             landmark.AccessibilityStatus = request.AccessibilityStatus;
             landmark.ExternalRegistryUrl = request.ExternalRegistryUrl;
-            landmark.Tags = tags;
         }
     }
 
     extension(CreateLandmarkRequest request)
     {
-        public Landmark ToEntity(string? normalizedName, ICollection<LandmarkTag> tags)
+        public Landmark ToEntity(string? normalizedName)
         {
             return new Landmark
             {
@@ -83,8 +78,7 @@ public static class LandmarkMappingExtensions
                 ProtectionStatus = request.ProtectionStatus,
                 PhysicalCondition = request.PhysicalCondition,
                 AccessibilityStatus = request.AccessibilityStatus,
-                ExternalRegistryUrl = request.ExternalRegistryUrl,
-                Tags = tags
+                ExternalRegistryUrl = request.ExternalRegistryUrl
             };
         }
     }
