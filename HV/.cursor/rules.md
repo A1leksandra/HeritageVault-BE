@@ -6,7 +6,7 @@ When generating ANY code, ALWAYS follow docs/scope.md as the single source of tr
 - Enums and allowed values
 - API behavior and idempotency
 - Delete behavior (soft vs hard)
-- Business rules and constraints
+- Business rules (including image behavior)
 
 If there is any conflict between a prompt and docs/scope.md, docs/scope.md MUST win.
 
@@ -68,14 +68,20 @@ MUST NOT redefine or replace these types.
   - uniqueness
   - soft delete rules
   - relationship integrity
+  - landmark image workflows (store/replace/delete + DB updates)
 
 ---
 
 ## API contracts
-- Controllers MUST use DTOs only
-- MUST NOT accept or return entities
-- DTOs MUST be C# records
-- Query parameters MUST be wrapped in query DTOs
+- Controllers MUST use DTOs only for JSON bodies and JSON responses.
+- Controllers MUST NOT accept or return entities.
+- DTOs MUST be C# records.
+- Query parameters MUST be wrapped in query DTOs.
+
+### File upload exception (allowed)
+- Landmark image upload endpoint MUST accept `IFormFile` (multipart/form-data).
+- This endpoint is allowed to be non-JSON input due to file upload requirements.
+- Responses from upload/delete endpoints MUST still be DTO-based JSON.
 
 ---
 
@@ -99,9 +105,16 @@ MUST NOT redefine or replace these types.
 ---
 
 ## Validation
-- Every request DTO and query DTO MUST have a FluentValidation validator
-- Validators MUST NOT query the database
-- Database/state validation belongs in services
+- Every request DTO and query DTO MUST have a FluentValidation validator.
+- Validators MUST NOT query the database.
+- Database/state validation belongs in services.
+
+### File upload validation
+- File type validation MUST be enforced (in service and/or controller):
+  - Accept common image formats only (PNG, JPEG, etc.).
+  - Validate by content type and/or extension (prefer content type + extension together).
+- Invalid image upload MUST throw CustomExceptionBase (HTTP 400).
+- If the uploaded image is missing/empty, return 400.
 
 ---
 
@@ -110,7 +123,7 @@ MUST NOT redefine or replace these types.
 - Expected business errors → throw CustomExceptionBase → HTTP 400
 - Duplicate create requests MUST be idempotent (return existing entity)
 - MUST NOT return HTTP 409 anywhere
-- Unexpected errors → HTTP 500
+- Unexpected errors → HTTP 500 (handled by global exception filter)
 
 ---
 
@@ -155,12 +168,29 @@ Use pattern matching to simplify logic where it improves clarity, e.g.:
 
 ---
 
+## Landmark image storage rules
+- Uploaded images MUST be stored under the application `wwwroot` (web root).
+- The database MUST store:
+  - Uploaded image path (relative path within wwwroot, suitable for building a public URL)
+  - An image link URL suitable for frontend display
+  - Optional external image link URL if introduced by scope (docs/scope.md)
+- Upload behavior MUST replace the existing uploaded image:
+  - Old file MUST be deleted from disk when replaced.
+  - DB fields MUST be updated accordingly.
+- Delete-image endpoint MUST:
+  - delete the file from disk (if present)
+  - clear the uploaded-image fields in DB
+- File system operations MUST be implemented via an abstraction in BLL (e.g., IFileStorageService) and used by LandmarkService.
+  - WebAPI provides environment details (like web root path) through DI.
+  - Do not implement file IO directly in controllers.
+
+---
+
 ## No scope creep
 MUST NOT add:
 - authentication or authorization
 - users or roles
 - payments or financial logic
 - background jobs
-- file upload logic
 
 unless docs/scope.md is explicitly updated.

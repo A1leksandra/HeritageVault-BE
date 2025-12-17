@@ -14,6 +14,7 @@ Primary use cases:
 - classify landmarks using reusable tags
 - browse and filter landmarks by location, condition, protection, accessibility, and tags
 - safely retire (soft-delete) obsolete reference data without losing historical context
+- optionally attach a representative image to a landmark for presentation purposes
 
 The system is intentionally simple and extensible.
 
@@ -32,6 +33,14 @@ Each landmark has:
 - exactly one **Physical Condition** (state)
 - exactly one **Accessibility Status** (public access)
 - zero or more **Landmark Tags** (descriptive labels)
+
+### Landmark image
+A landmark may optionally have an image used for visual presentation in the frontend.
+
+- The image may be uploaded to the system or referenced via a link.
+- If an uploaded image already exists, uploading a new image replaces the previous one.
+- An image may also be removed independently of the landmark itself.
+- Image handling is optional and does not affect core landmark data or business rules.
 
 ---
 
@@ -128,12 +137,18 @@ A landmark:
 - has one physical condition
 - has one accessibility status
 - may have multiple tags
+- may optionally have an associated image
 
 Landmarks are hard-deleted.
 
 Historical dating:
 - `FirstMentionYear` represents the earliest known historical mention
 - exact dates are intentionally not required
+
+Image notes:
+- An uploaded image is stored by the system and associated with the landmark.
+- A link suitable for frontend display is provided when an image exists.
+- Image presence does not affect landmark identity or uniqueness.
 
 ---
 
@@ -187,6 +202,11 @@ Hard delete applies to:
 - Landmarks belonging to deleted cities are not visible
 - Deleted countries/regions/cities behave as non-existent in reads
 
+### Image rules
+- Uploading an image for a landmark replaces any previously uploaded image
+- Deleting an image removes only the image, not the landmark
+- Image operations do not affect other landmark data
+
 ---
 
 ## Out of scope (for now)
@@ -195,5 +215,4 @@ Hard delete applies to:
 - Payments or ticketing
 - Moderation workflows
 - Audit history
-- File uploads (may be added later, but not required now)
 - Background processing
